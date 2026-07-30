@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model flyway_schema_history {
+  installed_rank Int      @id(map: "flyway_schema_history_pk")
+  version        String?  @db.VarChar(50)
+  description    String   @db.VarChar(200)
+  type           String   @db.VarChar(20)
+  script         String   @db.VarChar(1000)
+  checksum       Int?
+  installed_by   String   @db.VarChar(100)
+  installed_on   DateTime @default(now()) @db.Timestamp(6)
+  execution_time Int
+  success        Boolean
+
+  @@index([success], map: "flyway_schema_history_s_idx")
+}
+
+model images {
+  id                                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  url                                  String?
+  created_by                           String?   @db.Uuid
+  created_at                           DateTime? @db.Timestamp(6)
+  last_modified_by                     String?   @db.Uuid
+  last_modified_at                     DateTime? @db.Timestamp(6)
+  users_images_created_byTousers       users?    @relation("images_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_images_last_modified_byTousers users?    @relation("images_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  posts                                posts[]
+}
+
+model posts {
+  id                                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title                               String               @unique @db.VarChar(256)
+  slug                                String               @unique @db.VarChar(256)
+  topic_id                            String?              @db.Uuid
+  image_id                            String?              @db.Uuid
+  description                         String?              @db.VarChar(1024)
+  owner_id                            String?              @db.Uuid
+  is_published                        Boolean
+  created_by                          String?              @db.Uuid
+  created_at                          DateTime?            @db.Timestamp(6)
+  last_modified_by                    String?              @db.Uuid
+  last_modified_at                    DateTime?            @db.Timestamp(6)
+  users_posts_created_byTousers       users?               @relation("posts_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  images                              images?              @relation(fields: [image_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_posts_last_modified_byTousers users?               @relation("posts_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_posts_owner_idTousers         users?               @relation("posts_owner_idTousers", fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  topics                              topics?              @relation(fields: [topic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  posts_content                       posts_content[]
+  posts_tags                          posts_tags[]
+  posts_user_history                  posts_user_history[]
+}
+
+model posts_content {
+  id                                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version                                     BigInt
+  text                                        String
+  post_id                                     String    @db.Uuid
+  is_current_version                          Boolean
+  created_by                                  String?   @db.Uuid
+  created_at                                  DateTime? @db.Timestamp(6)
+  last_modified_by                            String?   @db.Uuid
+  last_modified_at                            DateTime? @db.Timestamp(6)
+  users_posts_content_created_byTousers       users?    @relation("posts_content_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_posts_content_last_modified_byTousers users?    @relation("posts_content_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  posts                                       posts     @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model posts_tags {
+  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tags_id String? @db.Uuid
+  post_id String? @db.Uuid
+  posts   posts?  @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tags    tags?   @relation(fields: [tags_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model posts_user_history {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_id   String  @db.Uuid
+  user_id   String  @db.Uuid
+  is_opened Boolean
+  is_viewed Boolean
+  is_liked  Boolean
+  posts     posts   @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([post_id, user_id])
+}
+
+model refresh_tokens {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token      String  @unique @db.VarChar(256)
+  token_type String  @db.VarChar(256)
+  is_revoked Boolean
+  is_expired Boolean
+  user_id    String  @db.Uuid
+  users      users   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tags {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tag        String       @unique @db.VarChar(256)
+  posts_tags posts_tags[]
+}
+
+model topics {
+  id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  topic String  @unique @db.VarChar(256)
+  posts posts[]
+}
+
+model users {
+  id                                                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name                                          String               @db.VarChar(256)
+  last_name                                           String               @db.VarChar(256)
+  username                                            String               @unique @db.VarChar(256)
+  email                                               String               @unique @db.VarChar(256)
+  password                                            String               @db.VarChar(256)
+  role                                                String               @db.VarChar(256)
+  is_expired                                          Boolean
+  is_locked                                           Boolean
+  is_credentials_valid                                Boolean
+  is_active                                           Boolean
+  created_by                                          String?              @db.Uuid
+  created_at                                          DateTime?            @db.Timestamp(6)
+  last_modified_by                                    String?              @db.Uuid
+  last_modified_at                                    DateTime?            @db.Timestamp(6)
+  images_images_created_byTousers                     images[]             @relation("images_created_byTousers")
+  images_images_last_modified_byTousers               images[]             @relation("images_last_modified_byTousers")
+  posts_posts_created_byTousers                       posts[]              @relation("posts_created_byTousers")
+  posts_posts_last_modified_byTousers                 posts[]              @relation("posts_last_modified_byTousers")
+  posts_posts_owner_idTousers                         posts[]              @relation("posts_owner_idTousers")
+  posts_content_posts_content_created_byTousers       posts_content[]      @relation("posts_content_created_byTousers")
+  posts_content_posts_content_last_modified_byTousers posts_content[]      @relation("posts_content_last_modified_byTousers")
+  posts_user_history                                  posts_user_history[]
+  refresh_tokens                                      refresh_tokens[]
+  users_users_created_byTousers                       users?               @relation("users_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_users_users_created_byTousers                 users[]              @relation("users_created_byTousers")
+  users_users_last_modified_byTousers                 users?               @relation("users_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_users_users_last_modified_byTousers           users[]              @relation("users_last_modified_byTousers")
+}

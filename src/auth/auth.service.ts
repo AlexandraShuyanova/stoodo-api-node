@@ -10,6 +10,12 @@ export interface RegisterRequest {
     password: string;
 }
 
+export interface AuthenticationRequest {
+    email: string;
+    password: string;
+    isSaveSession: boolean;
+}
+
 const prisma = new PrismaClient();
 
 export async function register(data: RegisterRequest) {
@@ -53,6 +59,46 @@ export async function register(data: RegisterRequest) {
             role: true,
         },
     });
+
+    const accessToken = generateAccessToken(user);
+
+    return {
+        accessToken,
+        user,
+    };
+}
+
+export async function login(data: AuthenticationRequest) {
+    const { email, password, isSaveSession } = data;
+
+    if (!email || !password) {
+        throw new Error('All fields are required');
+    }
+
+    const user =  await prisma.users.findUnique({
+        where: {
+            email
+        },
+        select: {
+            id: true,
+            email: true,
+            password: true,
+            role: true,
+            is_active: true,
+            is_locked: true,
+            is_expired: true,
+            is_credentials_valid: true,
+        },
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    const passOk = await bcrypt.compare(password, user.password);
+    if (!passOk) {
+        throw new Error("Invalid password");
+    }
 
     const accessToken = generateAccessToken(user);
 

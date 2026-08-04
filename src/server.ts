@@ -8,7 +8,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use('/auth', authRouter);
+app.use('/api/v1/auth', authRouter);
 
 app.get('/users', async (_, res) => {
     const users = await prisma.users.findMany();

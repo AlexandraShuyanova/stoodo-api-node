@@ -1,0 +1,4 @@
+
+[submodule "frontend/stoodo"]
+	path = frontend/stoodo
+	url = https://github.com/AlexandraShuyanova/stoodo

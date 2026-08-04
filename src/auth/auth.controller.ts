@@ -6,6 +6,7 @@ export async function register(req: Request, res: Response) {
     try {
         const authResponse = await authService.register(req.body);
         res.status(201).json(authResponse);
+        console.log("REGISTER");
     } catch (error){
         res.status(400).json({
             error: error instanceof Error ? error.message : "Unknown error",
@@ -18,6 +19,7 @@ export async function login(req: Request, res: Response) {
     try {
         const authResponse = await authService.login(req.body);
         res.status(201).json(authResponse);
+        console.log("LOGIN");
     } catch (error) {
         res.status(400).json({
             error: error instanceof Error ? error.message : "Unknown error",

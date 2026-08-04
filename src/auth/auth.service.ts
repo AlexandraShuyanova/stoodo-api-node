@@ -8,6 +8,7 @@ export interface RegisterRequest {
     username: string;
     email: string;
     password: string;
+    isSaveSession: boolean;
 }
 
 export interface AuthenticationRequest {

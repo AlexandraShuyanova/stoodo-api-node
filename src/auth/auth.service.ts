@@ -61,11 +61,10 @@ export async function register(data: RegisterRequest) {
         },
     });
 
-    const accessToken = generateAccessToken(user);
+    const access_token = generateAccessToken(user);
 
     return {
-        accessToken,
-        user,
+        access_token
     };
 }
 
@@ -101,10 +100,9 @@ export async function login(data: AuthenticationRequest) {
         throw new Error("Invalid password");
     }
 
-    const accessToken = generateAccessToken(user);
+    const access_token = generateAccessToken(user);
 
     return {
-        accessToken,
-        user,
+        access_token
     };
 }

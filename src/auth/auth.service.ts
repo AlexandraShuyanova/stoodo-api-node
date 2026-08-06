@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import {PrismaClient} from "@prisma/client";
-import {generateAccessToken} from "../jwt/jwt.service";
+import {generateAccessToken, verifyToken} from "../jwt/jwt.service";
 
 export interface RegisterRequest {
     firstName: string;
@@ -53,9 +53,6 @@ export async function register(data: RegisterRequest) {
         },
         select: {
             id: true,
-            first_name: true,
-            last_name: true,
-            username: true,
             email: true,
             role: true,
         },
@@ -84,10 +81,6 @@ export async function login(data: AuthenticationRequest) {
             email: true,
             password: true,
             role: true,
-            is_active: true,
-            is_locked: true,
-            is_expired: true,
-            is_credentials_valid: true,
         },
     });
 
@@ -105,4 +98,46 @@ export async function login(data: AuthenticationRequest) {
     return {
         access_token
     };
+}
+
+export async function userInfo(authHeader?: string ) {
+    if (!authHeader) {
+        throw new Error("Missing Authorization header");
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+
+    const payload = verifyToken(token);
+
+    const user =  await prisma.users.findUnique({
+        where: {
+            id: payload.id
+        },
+        select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            username: true,
+            created_by: true,
+            created_at: true,
+            last_modified_by: true,
+            last_modified_at: true,
+        },
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return {
+        id: user.id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        username: user.username,
+        createdBy: user.created_by,
+        createdAt: user.created_at,
+        lastModifiedBy: user.last_modified_by,
+        lastModifiedAt: user.last_modified_at,
+    }
+
 }

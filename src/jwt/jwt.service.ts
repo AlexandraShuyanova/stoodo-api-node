@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 
+const JWT_SECRET = process.env.JWT_SECRET!;
+
 export function generateAccessToken(user: {
     id: string;
     email: string;
@@ -11,9 +13,17 @@ export function generateAccessToken(user: {
             email: user.email,
             role: user.role,
         },
-        process.env.JWT_SECRET!,
+        JWT_SECRET,
         {
             expiresIn: '15m',
         }
     );
+}
+
+export function verifyToken(token: string) {
+    return jwt.verify(token, JWT_SECRET) as {
+        id: string;
+        email: string;
+        role: string;
+    };
 }

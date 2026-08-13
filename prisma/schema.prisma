@@ -24,11 +24,16 @@ model flyway_schema_history {
 
 model images {
   id                                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  url                                  String?
+  key                                  String    @unique @db.VarChar(512)
+  file_name                            String?   @db.VarChar(256)
+  mime_type                            String?   @db.VarChar(100)
+  size                                 Int?
+
   created_by                           String?   @db.Uuid
   created_at                           DateTime? @db.Timestamp(6)
   last_modified_by                     String?   @db.Uuid
   last_modified_at                     DateTime? @db.Timestamp(6)
+
   users_images_created_byTousers       users?    @relation("images_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_images_last_modified_byTousers users?    @relation("images_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   posts                                posts[]

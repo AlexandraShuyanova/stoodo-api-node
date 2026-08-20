@@ -43,9 +43,7 @@ model posts {
   id                                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title                               String               @unique @db.VarChar(256)
   slug                                String               @unique @db.VarChar(256)
-  topic_id                            String?              @db.Uuid
   image_id                            String?              @db.Uuid
-  description                         String?              @db.VarChar(1024)
   owner_id                            String?              @db.Uuid
   is_published                        Boolean
   created_by                          String?              @db.Uuid
@@ -55,8 +53,7 @@ model posts {
   users_posts_created_byTousers       users?               @relation("posts_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   images                              images?              @relation(fields: [image_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_posts_last_modified_byTousers users?               @relation("posts_last_modified_byTousers", fields: [last_modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_posts_owner_idTousers         users?               @relation("posts_owner_idTousers", fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  topics                              topics?              @relation(fields: [topic_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  owner                               users?               @relation("posts_owner_idTousers", fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   posts_content                       posts_content[]
   posts_tags                          posts_tags[]
   posts_user_history                  posts_user_history[]
@@ -64,7 +61,7 @@ model posts {
 
 model posts_content {
   id                                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  version                                     BigInt
+  version                                     Int
   text                                        String
   post_id                                     String    @db.Uuid
   is_current_version                          Boolean
@@ -117,7 +114,6 @@ model tags {
 model topics {
   id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   topic String  @unique @db.VarChar(256)
-  posts posts[]
 }
 
 model users {

@@ -139,5 +139,4 @@ export async function userInfo(authHeader?: string ) {
         lastModifiedBy: user.last_modified_by,
         lastModifiedAt: user.last_modified_at,
     }
-
 }

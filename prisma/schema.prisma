@@ -57,6 +57,8 @@ model posts {
   posts_content                       posts_content[]
   posts_tags                          posts_tags[]
   posts_user_history                  posts_user_history[]
+  topic_id                            String? @db.Uuid
+  topic                               topics? @relation(fields: [topic_id], references: [id])
 }
 
 model posts_content {
@@ -114,6 +116,9 @@ model tags {
 model topics {
   id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   topic String  @unique @db.VarChar(256)
+  color String @default("#E4EDF9") @db.VarChar(20)
+
+  posts posts[]
 }
 
 model users {

@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 export async function createPost(data: CreatePostRequest, userId: string) {
     const { title, image, content} = data;
 
-    if (!title || !image || !content) {
+    if (!title || !content) {
         throw new Error('All fields are required');
     }
 
